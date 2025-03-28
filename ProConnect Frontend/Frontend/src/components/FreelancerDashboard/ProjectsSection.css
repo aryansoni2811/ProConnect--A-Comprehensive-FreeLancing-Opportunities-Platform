@@ -1,0 +1,122 @@
+.projects-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e6e8f0;
+    padding-bottom: 1rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .add-project-btn {
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-project-btn:hover {
+    background-color: #2c5282;
+  }
+  
+  .project-card {
+    background-color: #f7fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e6e8f0;
+  }
+  
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .project-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .project-icon {
+    color: #4299e1;
+    stroke-width: 2;
+  }
+  
+  .project-title h3 {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+  
+  .project-title p {
+    color: #718096;
+    font-size: 0.875rem;
+  }
+  
+  .project-actions {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #718096;
+  }
+  
+  .project-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .project-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .project-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    color: #718096;
+    font-size: 0.875rem;
+  }
+  
+  .progress-bar {
+    background-color: #e6e8f0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    height: 100%;
+    background-color: #48bb78;
+  }
+  
+  .progress-percentage {
+    text-align: right;
+    color: #718096;
+    font-size: 0.875rem;
+  }
