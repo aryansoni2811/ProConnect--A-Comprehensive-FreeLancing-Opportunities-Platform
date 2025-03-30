@@ -49,7 +49,7 @@ const ClientSignup = () => {
   
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
-        navigate('/dashboard');
+        navigate('/client-dashboard');
       } else {
         setError(response.data.message || 'Signup failed');
       }
