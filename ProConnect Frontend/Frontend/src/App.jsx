@@ -6,13 +6,15 @@ import FreelancerLogin from './components/FreelancerLogin/FreelancerLogin';
 import ClientSignup from './components/ClientSignup/ClientSignup';
 import FreelancerSignup from './components/FreelancerSignup/FreelancerSignup';
 import LoginSelection from './components/LoginSelection/LoginSelection';
-
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import ClientDashboard from './components/Client-Dashboard/Client-Dashboard';
 import FreelancerDashboard from './components/FreelancerDashboard/FreelancerDashboard';
 
 function App() {
+
+  const isAuthenticated = localStorage.getItem('token') !== null;
   return (
     <Router>
       <Navbar />

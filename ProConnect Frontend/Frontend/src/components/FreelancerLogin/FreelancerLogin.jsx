@@ -17,7 +17,7 @@ const FreelancerLogin = () => {
         <input type="email" placeholder="Email" required />
         <input type="password" placeholder="Password" required />
         <button type="submit">Login</button>
-        <button type="button" className="google-btn">Sign in with Google</button>
+        {/* <button type="button" className="google-btn">Sign in with Google</button> */}
       </form>
       <p>
         Don't have an account? 

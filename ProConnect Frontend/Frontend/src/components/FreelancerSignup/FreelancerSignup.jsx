@@ -19,7 +19,7 @@ const FreelancerSignup = () => {
         <input type="password" placeholder="Password" required />
         <input type="password" placeholder="Confirm Password" required />
         <button type="submit">Sign Up</button>
-        <button type="button" className="google-btn">Sign up with Google</button>
+        {/* <button type="button" className="google-btn">Sign up with Google</button> */}
       </form>
       <p>
         Already have an account? 
