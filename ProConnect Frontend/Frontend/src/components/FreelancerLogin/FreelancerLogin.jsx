@@ -38,6 +38,7 @@ const FreelancerLogin = () => {
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userType', 'freelancer');
+        localStorage.setItem('freelancerEmail', formData.email);
         navigate('/freelancer-dashboard');
       } else {
         setError(response.data.message || 'Login failed');

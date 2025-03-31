@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { 
   Home, 
   Plus, 
@@ -10,9 +10,32 @@ import {
   FileText 
 } from 'lucide-react';
 import './Client-Dashboard.css';
+import axiosInstance from '../config/axiosConfig';
 
 const ClientDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [clientData, setClientData] = useState(null); 
+  const [loading, setLoading] = useState(true); 
+
+  useEffect(() => {
+    const fetchClientData = async () => {
+      try {
+        const clientEmail = localStorage.getItem('clientEmail');
+        if (!clientEmail) {
+          throw new Error('No client email found');
+        }
+        
+        const response = await axiosInstance.get(`/api/auth/client?email=${clientEmail}`);
+        setClientData(response.data);
+      } catch (error) {
+        console.error('Error fetching client data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClientData();
+  }, []);
 
   const projectStats = {
     totalProjects: 7,
@@ -230,25 +253,25 @@ const ClientDashboard = () => {
           </div>
         );
       
-      case 'profile':
-        return (
-          <div className="profile-section">
-            <h2>User Profile</h2>
-            <div className="profile-details">
-              <img 
-                src="/api/placeholder/200/200" 
-                alt="Profile" 
-                className="profile-image" 
-              />
-              <div className="profile-info">
-                <h3>John Smith</h3>
-                <p>Email: johnsmith@example.com</p>
-                <p>Location: New York, USA</p>
-                <p>Member Since: January 2024</p>
+        case 'profile':
+          return (
+            <div className="profile-section">
+              <h2>User Profile</h2>
+              <div className="profile-details">
+                <img 
+                  src="/api/placeholder/200/200" 
+                  alt="Profile" 
+                  className="profile-image" 
+                />
+                <div className="profile-info">
+                  <h3>{clientData?.name || 'Loading...'}</h3>
+                  <p>Email: {clientData?.email || 'Loading...'}</p>
+                  <p>Location: {clientData?.location || 'New York, USA'}</p>
+                  <p>Member Since: {clientData?.createdAt ? new Date(clientData.createdAt).toLocaleDateString() : 'January 2024'}</p>
+                </div>
               </div>
             </div>
-          </div>
-        );
+          );
       
       default:
         return null;
@@ -267,8 +290,8 @@ const ClientDashboard = () => {
             alt="Profile" 
             className="user-profile-image" 
           />
-          <h3>John Smith</h3>
-          <p>johnsmith@example.com</p>
+          <h3>{clientData?.name || 'Loading...'}</h3>
+          <p>{clientData?.email || 'Loading...'}</p>
         </div>
 
         <nav className="dashboard-nav">

@@ -47,6 +47,11 @@ public class AuthService {
         return new AuthResponseDTO(token, "Signup successful", true);
     }
 
+    public Client findByEmail(String email) {
+        return clientRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+    }
+
     public AuthResponseDTO login(ClientLoginDTO loginDTO) {
         // Find client by email
         Optional<Client> optionalClient = clientRepository.findByEmail(loginDTO.getEmail());

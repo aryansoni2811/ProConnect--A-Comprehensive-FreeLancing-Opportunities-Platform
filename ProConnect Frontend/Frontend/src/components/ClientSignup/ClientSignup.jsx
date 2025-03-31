@@ -49,6 +49,7 @@ const ClientSignup = () => {
   
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('clientEmail', formData.email);
         navigate('/client-dashboard');
       } else {
         setError(response.data.message || 'Signup failed');

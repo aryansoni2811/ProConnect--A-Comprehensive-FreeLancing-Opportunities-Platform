@@ -1,14 +1,11 @@
 package com.example.backend.controller;
 
+import com.example.backend.entity.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.AuthResponseDTO;
 import com.example.backend.dto.ClientLoginDTO;
@@ -35,6 +32,20 @@ public class AuthController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new AuthResponseDTO(null, "Error during signup: " + e.getMessage(), false));
+        }
+    }
+
+    @GetMapping("/client")
+    public ResponseEntity<?> getClientByEmail(@RequestParam String email) {
+        try {
+            Client client = authService.findByEmail(email);
+            if (client == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+            }
+            return ResponseEntity.ok(client);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching client: " + e.getMessage());
         }
     }
 

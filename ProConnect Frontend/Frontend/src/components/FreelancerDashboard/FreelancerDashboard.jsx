@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   Briefcase, 
   FileText, 
   DollarSign, 
   MessageCircle, 
-  Settings, 
-  Star, 
-  CheckCircle, 
-  Clock, 
-  Zap 
+  Settings,
+  User,
+  CheckCircle,
+  Clock,
+  Zap
 } from 'lucide-react';
 import './FreelancerDashboard.css';
-
-// Import the new section components
+import axiosInstance from '../config/axiosConfig';
 import ProjectsSection from './ProjectsSection';
 import ProposalsSection from './ProposalsSection';
 import EarningsSection from './EarningsSection';
@@ -22,9 +21,14 @@ import SettingsSection from './SettingsSection';
 
 const FreelancerDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
+  const [freelancerData, setFreelancerData] = useState({
+    name: '',
+    email: ''
+  });
+  const [loading, setLoading] = useState(true);
 
-  const freelancerData = {
-    name: 'Sarah Johnson',
+  // Hardcoded data
+  const hardcodedData = {
     profession: 'Graphic Designer',
     totalEarnings: 45670,
     completedProjects: 42,
@@ -48,34 +52,57 @@ const FreelancerDashboard = () => {
     ]
   };
 
+  useEffect(() => {
+    const fetchFreelancerData = async () => {
+      try {
+        const email = localStorage.getItem('freelancerEmail');
+        if (!email) {
+          throw new Error('No freelancer email found in localStorage');
+        }
+        
+        const response = await axiosInstance.get(`/api/auth/freelancer/freelancer?email=${email}`);
+        setFreelancerData({
+          name: response.data.name || 'Not provided',
+          email: response.data.email || 'Not provided'
+        });
+      } catch (error) {
+        console.error('Error fetching freelancer data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFreelancerData();
+  }, []);
+
   const renderOverview = () => (
     <div className="dashboard-metrics-grid">
       <div className="dashboard-metric-card earnings-card">
         <DollarSign className="metric-icon" />
         <div>
           <h3>Total Earnings</h3>
-          <p>${freelancerData.totalEarnings.toLocaleString()}</p>
+          <p>${hardcodedData.totalEarnings.toLocaleString()}</p>
         </div>
       </div>
       <div className="dashboard-metric-card projects-card">
         <CheckCircle className="metric-icon" />
         <div>
           <h3>Completed Projects</h3>
-          <p>{freelancerData.completedProjects}</p>
+          <p>{hardcodedData.completedProjects}</p>
         </div>
       </div>
       <div className="dashboard-metric-card active-projects-card">
         <Clock className="metric-icon" />
         <div>
           <h3>Active Projects</h3>
-          <p>{freelancerData.activeProjects}</p>
+          <p>{hardcodedData.activeProjects}</p>
         </div>
       </div>
       <div className="dashboard-metric-card profile-card">
         <Zap className="metric-icon" />
         <div>
           <h3>Profile Completeness</h3>
-          <p>{freelancerData.profileCompleteness}%</p>
+          <p>{hardcodedData.profileCompleteness}%</p>
         </div>
       </div>
     </div>
@@ -84,7 +111,7 @@ const FreelancerDashboard = () => {
   const renderRecentProjects = () => (
     <div className="recent-projects-container">
       <h2>Recent Projects</h2>
-      {freelancerData.recentProjects.map(project => (
+      {hardcodedData.recentProjects.map(project => (
         <div key={project.id} className="project-item">
           <div className="project-details">
             <h3>{project.title}</h3>
@@ -106,13 +133,10 @@ const FreelancerDashboard = () => {
   const renderSidebar = () => (
     <div className="sidebar-container">
       <div className="profile-section">
-        <img 
-          src="/api/placeholder/120/120" 
-          alt="Profile" 
-          className="profile-image"
-        />
+        <User className="profile-image" size={64} />
         <h2>{freelancerData.name}</h2>
-        <p>{freelancerData.profession}</p>
+        <p>{hardcodedData.profession}</p>
+        <p className="profile-email">{freelancerData.email}</p>
       </div>
       <nav className="sidebar-navigation">
         {[
@@ -137,6 +161,10 @@ const FreelancerDashboard = () => {
   );
 
   const renderMainContent = () => {
+    if (loading) {
+      return <div className="loading-container">Loading profile data...</div>;
+    }
+
     switch(activeSection) {
       case 'overview':
         return (
@@ -154,7 +182,7 @@ const FreelancerDashboard = () => {
       case 'messages':
         return <MessagesSection />;
       case 'settings':
-        return <SettingsSection />;
+        return <SettingsSection freelancerData={freelancerData} />;
       default:
         return null;
     }

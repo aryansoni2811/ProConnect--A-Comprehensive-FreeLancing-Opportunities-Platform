@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Settings, User, Bell, Shield, CreditCard, Lock } from 'lucide-react';
+import { Settings, User, Bell, Shield, Lock } from 'lucide-react';
 import './SettingsSection.css';
 
-const SettingsSection = () => {
+const SettingsSection = ({ freelancerData }) => {
   const [profileSettings, setProfileSettings] = useState({
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@example.com',
-    profession: 'Graphic Designer',
+    name: freelancerData.name || '',
+    email: freelancerData.email || '',
     notifications: {
       email: true,
       sms: false,
@@ -44,11 +43,7 @@ const SettingsSection = () => {
             </div>
             <div className="profile-details">
               <div className="profile-image-container">
-                <img 
-                  src="/api/placeholder/120/120" 
-                  alt="Profile" 
-                  className="profile-image"
-                />
+                <User className="profile-image" size={80} />
                 <button className="change-image-btn">Change Photo</button>
               </div>
               <div className="profile-info">
@@ -65,14 +60,6 @@ const SettingsSection = () => {
                   <input 
                     type="email" 
                     value={profileSettings.email} 
-                    readOnly 
-                  />
-                </div>
-                <div className="info-row">
-                  <label>Profession</label>
-                  <input 
-                    type="text" 
-                    value={profileSettings.profession} 
                     readOnly 
                   />
                 </div>
@@ -118,47 +105,6 @@ const SettingsSection = () => {
                   />
                   <span className="slider"></span>
                 </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="settings-card privacy-settings">
-            <div className="card-header">
-              <Shield className="card-icon" />
-              <h3>Privacy & Security</h3>
-            </div>
-            <div className="privacy-options">
-              <div className="select-row">
-                <label>Profile Visibility</label>
-                <select 
-                  value={profileSettings.privacy.profileVisibility}
-                  onChange={(e) => setProfileSettings(prev => ({
-                    ...prev,
-                    privacy: {
-                      ...prev.privacy,
-                      profileVisibility: e.target.value
-                    }
-                  }))}
-                >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                </select>
-              </div>
-              <div className="select-row">
-                <label>Contact Preferences</label>
-                <select 
-                  value={profileSettings.privacy.contactPreference}
-                  onChange={(e) => setProfileSettings(prev => ({
-                    ...prev,
-                    privacy: {
-                      ...prev.privacy,
-                      contactPreference: e.target.value
-                    }
-                  }))}
-                >
-                  <option value="all">Allow All</option>
-                  <option value="clients">Clients Only</option>
-                </select>
               </div>
             </div>
           </div>

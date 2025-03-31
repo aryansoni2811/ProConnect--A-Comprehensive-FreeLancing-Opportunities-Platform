@@ -41,6 +41,11 @@ public class FreeLancerAuthService {
         return new AuthResponseDTO(token, "Freelancer signup successful", true);
     }
 
+    public Freelancer findFreelancerByEmail(String email) {
+        return freelancerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Freelancer not found"));
+    }
+
     public AuthResponseDTO freelancerLogin(FreelancerLoginDTO loginDTO) {
         Optional<Freelancer> optionalFreelancer = freelancerRepository.findByEmail(loginDTO.getEmail());
 
