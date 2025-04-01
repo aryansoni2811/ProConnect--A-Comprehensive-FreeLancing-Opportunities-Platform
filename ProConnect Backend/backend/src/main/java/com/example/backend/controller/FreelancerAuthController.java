@@ -12,6 +12,9 @@ import com.example.backend.dto.FreelancerLoginDTO;
 import com.example.backend.dto.FreelancerSignupDTO;
 import com.example.backend.service.AuthService;
 
+import com.example.backend.entity.Skill;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth/freelancer")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -53,6 +56,52 @@ public class FreelancerAuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500)
                     .body(new AuthResponseDTO(null, "Error during login: " + e.getMessage(), false));
+        }
+    }
+
+
+    @GetMapping("/{freelancerId}/skills")
+    public ResponseEntity<List<Skill>> getFreelancerSkills(@PathVariable Long freelancerId) {
+        try {
+            List<Skill> skills = authService.getFreelancerSkills(freelancerId);
+            return ResponseEntity.ok(skills);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/{freelancerId}/skills")
+    public ResponseEntity<Skill> addSkill(
+            @PathVariable Long freelancerId,
+            @RequestParam String name,
+            @RequestParam String proficiency) {
+        try {
+            Skill skill = authService.addSkillToFreelancer(freelancerId, name, proficiency);
+            return ResponseEntity.ok(skill);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{freelancerId}/skills/{skillId}")
+    public ResponseEntity<Void> removeSkill(
+            @PathVariable Long freelancerId,
+            @PathVariable Long skillId) {
+        try {
+            authService.removeSkillFromFreelancer(freelancerId, skillId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Freelancer>> searchFreelancersBySkill(@RequestParam String skill) {
+        try {
+            List<Freelancer> freelancers = authService.findFreelancersBySkill(skill);
+            return ResponseEntity.ok(freelancers);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

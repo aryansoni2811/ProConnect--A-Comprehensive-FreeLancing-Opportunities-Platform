@@ -18,6 +18,7 @@ import ProposalsSection from './ProposalsSection';
 import EarningsSection from './EarningsSection';
 import MessagesSection from './MessagesSection';
 import SettingsSection from './SettingsSection';
+import BrowseProjectsSection from './BrowseProjectsSection';
 
 const FreelancerDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -142,7 +143,7 @@ const FreelancerDashboard = () => {
         {[
           { icon: Home, label: 'Overview', section: 'overview' },
           { icon: Briefcase, label: 'Projects', section: 'projects' },
-          { icon: FileText, label: 'Proposals', section: 'proposals' },
+          { icon: FileText, label: 'Browse Projects', section: 'browse-projects' },
           { icon: DollarSign, label: 'Earnings', section: 'earnings' },
           { icon: MessageCircle, label: 'Messages', section: 'messages' },
           { icon: Settings, label: 'Settings', section: 'settings' }
@@ -175,8 +176,8 @@ const FreelancerDashboard = () => {
         );
       case 'projects':
         return <ProjectsSection />;
-      case 'proposals':
-        return <ProposalsSection />;
+        case 'browse-projects':
+          return <BrowseProjectsSection />;
       case 'earnings':
         return <EarningsSection />;
       case 'messages':
