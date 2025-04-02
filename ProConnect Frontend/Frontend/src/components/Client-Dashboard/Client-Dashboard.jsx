@@ -7,7 +7,12 @@ import {
   MessageCircle, 
   CheckCircle, 
   DollarSign, 
-  FileText 
+  FileText,
+  Star,
+  Mail,
+  Briefcase,
+  Check,
+  X
 } from 'lucide-react';
 import './Client-Dashboard.css';
 import axiosInstance from '../config/axiosConfig';
@@ -35,6 +40,15 @@ const ClientDashboard = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  // Freelancer search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+  const [projectProposals, setProjectProposals] = useState({});
+  const [loadingProposals, setLoadingProposals] = useState(false);
 
   // Get client data
   useEffect(() => {
@@ -72,12 +86,10 @@ const ClientDashboard = () => {
     const fetchClientProjects = async () => {
       try {
         const clientEmail = localStorage.getItem('clientEmail');
-        if (!clientEmail) {
-          return;
-        }
+        if (!clientEmail) return;
         
         const response = await axiosInstance.get(`/api/projects/client?email=${clientEmail}`);
-        setRecentProjects(response.data.slice(0, 5)); // Get only 5 most recent projects
+        setRecentProjects(response.data);
         
         // Calculate stats
         const stats = {
@@ -88,6 +100,16 @@ const ClientDashboard = () => {
         };
         
         setProjectStats(stats);
+        
+        // Fetch proposals for each project
+        const proposalsData = {};
+        for (const project of response.data) {
+          if (project.status === 'Open') {
+            const proposalsRes = await axiosInstance.get(`/api/proposals/project/${project.id}`);
+            proposalsData[project.id] = proposalsRes.data;
+          }
+        }
+        setProjectProposals(proposalsData);
       } catch (error) {
         console.error('Error fetching client projects:', error);
       }
@@ -95,6 +117,115 @@ const ClientDashboard = () => {
 
     fetchClientProjects();
   }, []);
+
+
+  const handleAcceptProposal = async (proposalId) => {
+    try {
+      setLoadingProposals(true);
+      const response = await axiosInstance.put(`/api/proposals/${proposalId}/accept`);
+      
+      // Update local state
+      const updatedProposals = {...projectProposals};
+      for (const projectId in updatedProposals) {
+        updatedProposals[projectId] = updatedProposals[projectId].map(proposal => {
+          if (proposal.id === proposalId) {
+            return response.data;
+          }
+          return proposal;
+        });
+      }
+      setProjectProposals(updatedProposals);
+      
+      // Refresh projects
+      const clientEmail = localStorage.getItem('clientEmail');
+      const projectsRes = await axiosInstance.get(`/api/projects/client?email=${clientEmail}`);
+      setRecentProjects(projectsRes.data);
+    } catch (error) {
+      console.error('Error accepting proposal:', error);
+      alert(error.response?.data?.message || 'Failed to accept proposal');
+    } finally {
+      setLoadingProposals(false);
+    }
+  };
+
+  // Handle rejecting a proposal
+  const handleRejectProposal = async (proposalId) => {
+    try {
+      setLoadingProposals(true);
+      const response = await axiosInstance.put(`/api/proposals/${proposalId}/reject`);
+      
+      // Update local state
+      const updatedProposals = {...projectProposals};
+      for (const projectId in updatedProposals) {
+        updatedProposals[projectId] = updatedProposals[projectId].map(proposal => {
+          if (proposal.id === proposalId) {
+            return response.data;
+          }
+          return proposal;
+        });
+      }
+      setProjectProposals(updatedProposals);
+    } catch (error) {
+      console.error('Error rejecting proposal:', error);
+      alert(error.response?.data?.message || 'Failed to reject proposal');
+    } finally {
+      setLoadingProposals(false);
+    }
+  };
+
+
+  // Improved freelancer search function with better error handling
+  const handleFreelancerSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    setSearchError('');
+    setSearchResults([]);
+    
+    try {
+      // Encode the search query to handle spaces/special characters
+      const encodedQuery = encodeURIComponent(searchQuery.trim());
+      console.log(`Searching for: ${encodedQuery}`);
+      
+      // Simplified request with proper error handling
+      const response = await axiosInstance.get(`/api/auth/freelancer/search?skill=${encodedQuery}`);
+      
+      console.log('Search response:', response);
+      
+      if (Array.isArray(response.data)) {
+        setSearchResults(response.data);
+        if (response.data.length === 0) {
+          console.log('No freelancers found matching the criteria');
+        }
+      } else {
+        console.error('Unexpected response format:', response.data);
+        setSearchError('Received unexpected data format from server');
+      }
+    } catch (error) {
+      console.error('Search error details:', error);
+
+      let errorMessage = 'Failed to search freelancers';
+      
+      if (error.response) {
+        // Server responded with an error status
+        const status = error.response.status;
+        const errorData = error.response.data;
+        
+        errorMessage = `Error (${status}): ${errorData || 'Unknown server error'}`;
+      } else if (error.request) {
+        // Request was made but no response received
+        errorMessage = 'No response received from server. Please check your connection.';
+      } else {
+        // Error in setting up the request
+        errorMessage = `Request error: ${error.message}`;
+      }
+
+      setSearchError(errorMessage);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   // Handle project form input change
   const handleInputChange = (e) => {
@@ -219,6 +350,7 @@ const ClientDashboard = () => {
       label: 'Dashboard', 
       section: 'dashboard' 
     },
+    { icon: Briefcase, label: 'Proposals', section: 'proposals' },
     { 
       icon: Plus, 
       label: 'Post Project', 
@@ -326,6 +458,80 @@ const ClientDashboard = () => {
             </div>
           </>
         );
+
+
+        case 'proposals':
+        return (
+          <div className="proposals-section">
+            <h2>Project Proposals</h2>
+            {loadingProposals ? (
+              <div className="loading-spinner">Loading proposals...</div>
+            ) : (
+              <div className="proposals-container">
+                {recentProjects.filter(p => p.status === 'Open').length > 0 ? (
+                  recentProjects.filter(p => p.status === 'Open').map(project => (
+                    <div key={project.id} className="project-card">
+                      <div className="project-header">
+                        <h3>{project.title}</h3>
+                        <span className="project-status status-open">{project.status}</span>
+                      </div>
+                      
+                      <div className="proposals-list">
+                        <h4>Proposals ({projectProposals[project.id]?.length || 0})</h4>
+                        
+                        {projectProposals[project.id]?.length > 0 ? (
+                          projectProposals[project.id].map(proposal => (
+                            <div key={proposal.id} className="proposal-card">
+                              <div className="proposal-header">
+                                <div className="freelancer-info">
+                                  <User size={16} />
+                                  <span>{proposal.freelancer.name}</span>
+                                </div>
+                                <span className={`proposal-status ${proposal.status.toLowerCase()}`}>
+                                  {proposal.status}
+                                </span>
+                              </div>
+                              
+                              <div className="proposal-details">
+                                <p><strong>Bid Amount:</strong> ${proposal.bidAmount.toFixed(2)}</p>
+                                <p><strong>Submitted:</strong> {new Date(proposal.submittedAt).toLocaleString()}</p>
+                              </div>
+                              
+                              <div className="proposal-cover-letter">
+                                <p>{proposal.coverLetter}</p>
+                              </div>
+                              
+                              {proposal.status === 'Pending' && (
+                                <div className="proposal-actions">
+                                  <button 
+                                    className="btn-accept"
+                                    onClick={() => handleAcceptProposal(proposal.id)}
+                                  >
+                                    <Check size={16} /> Accept
+                                  </button>
+                                  <button 
+                                    className="btn-reject"
+                                    onClick={() => handleRejectProposal(proposal.id)}
+                                  >
+                                    <X size={16} /> Reject
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p>No proposals received yet for this project.</p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>You currently have no open projects with proposals.</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
       
       case 'post-project':
         return (
@@ -422,16 +628,70 @@ const ClientDashboard = () => {
         return (
           <div className="find-freelancers-section">
             <h2>Find Freelancers</h2>
-            <div className="search-container">
+            <form onSubmit={handleFreelancerSearch} className="search-container">
               <input 
                 type="text" 
-                placeholder="Search freelancers by skills" 
+                placeholder="Search freelancers by skills (e.g., web dev, backend)" 
                 className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="search-btn">Search</button>
-            </div>
+              <button type="submit" className="search-btn" disabled={isSearching}>
+                {isSearching ? 'Searching...' : 'Search'}
+              </button>
+            </form>
+            
+            {searchError && (
+              <div className="error-message">
+                {searchError}
+              </div>
+            )}
+            
             <div className="freelancers-list">
-              <p>Freelancer search results will appear here.</p>
+              {isSearching ? (
+                <div className="loading-spinner">Loading...</div>
+              ) : searchResults.length > 0 ? (
+                <div className="freelancer-grid">
+                  {searchResults.map((freelancer) => (
+                    <div key={freelancer.id} className="freelancer-card">
+                      <div className="freelancer-header">
+                        <div className="freelancer-avatar">
+                          {freelancer.name?.charAt(0)?.toUpperCase() || 'F'}
+                        </div>
+                        <div className="freelancer-info">
+                          <h3>{freelancer.name || 'Unknown Freelancer'}</h3>
+                          <p>{freelancer.email || 'No email provided'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="freelancer-skills">
+                        <h4>Skills:</h4>
+                        {freelancer.skills?.length > 0 ? (
+                          <div className="skills-container">
+                            {freelancer.skills.map((skill) => (
+                              <span key={skill.id} className="skill-tag">
+                                {skill.name} ({skill.proficiency})
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No skills listed</p>
+                        )}
+                      </div>
+                      
+                      <div className="freelancer-actions">
+                        <button className="message-btn">
+                          <Mail size={16} /> Message
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : searchQuery ? (
+                <p>No freelancers found with the specified skills.</p>
+              ) : (
+                <p>Enter a skill to search for freelancers (e.g., "web dev").</p>
+              )}
             </div>
           </div>
         );
@@ -471,42 +731,42 @@ const ClientDashboard = () => {
     }
   };
 
-  return (
-    <div className="client-dashboard">
-      
-      <div className="dashboard-sidebar">
-        <div className="user-profile">
-          <img 
-            src="/api/placeholder/120/120" 
-            alt="Profile" 
-            className="user-profile-image" 
-          />
-          <h3>{clientData?.name || 'Loading...'}</h3>
-          <p>{clientData?.email || 'Loading...'}</p>
+    return (
+      <div className="client-dashboard">
+        
+        <div className="dashboard-sidebar">
+          <div className="user-profile">
+            <img 
+              src="/api/placeholder/120/120" 
+              alt="Profile" 
+              className="user-profile-image" 
+            />
+            <h3>{clientData?.name || 'Loading...'}</h3>
+            <p>{clientData?.email || 'Loading...'}</p>
+          </div>
+
+          <nav className="dashboard-nav">
+            <ul className="nav-menu">
+              {navigationItems.map((item, index) => (
+                <li 
+                  key={index}
+                  className={`nav-item ${activeSection === item.section ? 'active' : ''}`}
+                  onClick={() => setActiveSection(item.section)}
+                >
+                  <item.icon className="nav-item-icon" size={20} />
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
-        <nav className="dashboard-nav">
-          <ul className="nav-menu">
-            {navigationItems.map((item, index) => (
-              <li 
-                key={index}
-                className={`nav-item ${activeSection === item.section ? 'active' : ''}`}
-                onClick={() => setActiveSection(item.section)}
-              >
-                <item.icon className="nav-item-icon" size={20} />
-                {item.label}
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {/* Main Content */}
+        <main className="dashboard-content">
+          {renderSection()}
+        </main>
       </div>
+    );
+  };
 
-      {/* Main Content */}
-      <main className="dashboard-content">
-        {renderSection()}
-      </main>
-    </div>
-  );
-};
-
-export default ClientDashboard;
+  export default ClientDashboard;

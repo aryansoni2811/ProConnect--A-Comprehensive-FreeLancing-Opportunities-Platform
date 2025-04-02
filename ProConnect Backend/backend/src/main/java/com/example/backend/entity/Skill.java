@@ -1,22 +1,47 @@
-
 package com.example.backend.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Data
+@Table(name = "skills")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Skill {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String proficiency; // beginner, intermediate, expert
 
-    @ManyToOne
-    @JoinColumn(name = "freelancer_id")
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String proficiency;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "freelancer_id", nullable = false)
+    @JsonIgnoreProperties("skills") // Prevent infinite recursion during JSON serialization
     private Freelancer freelancer;
 
+    // Constructors
+    public Skill() {
+    }
+
+    public Skill(String name, String proficiency) {
+        this.name = name;
+        this.proficiency = proficiency;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }

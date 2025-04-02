@@ -3,6 +3,8 @@ package com.example.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,14 +17,14 @@ public class Freelancer {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Skill> skills;
+    @OneToMany(mappedBy = "freelancer", fetch = FetchType.EAGER)
+    private List<Skill> skills = new ArrayList<>();
 
-    public Set<Skill> getSkills() {
+    public List<Skill> getSkills() {
         return skills;
     }
 
-    public void setSkills(Set<Skill> skills) {
+    public void setSkills(List<Skill> skills) {
         this.skills = skills;
     }
 

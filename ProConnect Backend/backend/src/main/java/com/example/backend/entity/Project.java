@@ -1,133 +1,112 @@
 package com.example.backend.entity;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "projects")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Project {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Column(nullable = false)
     private String title;
 
+    @Getter
     @Column(nullable = false, length = 1000)
     private String description;
 
+    @Getter
     @Column(nullable = false)
     private Double budget;
 
+    @Getter
     @Column(nullable = false)
     private LocalDate deadline;
 
+    @Getter
     @Column(nullable = false)
     private String requiredSkills;
 
+    @Getter
     @Column(nullable = false)
-    private String status = "Open"; // Default status
+    private String status = "Open"; // Open, In Progress, Completed
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
+    @Getter
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Getter
     @Column
     private LocalDateTime updatedAt;
+
+    @Column
+    private Boolean isPaid = false;
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Double getBudget() {
-        return budget;
     }
 
     public void setBudget(Double budget) {
         this.budget = budget;
     }
 
-    public LocalDate getDeadline() {
-        return deadline;
-    }
-
     public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
-    }
-
-    public String getRequiredSkills() {
-        return requiredSkills;
     }
 
     public void setRequiredSkills(String requiredSkills) {
         this.requiredSkills = requiredSkills;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public Client getClient() {
-        return client;
     }
 
     public void setClient(Client client) {
         this.client = client;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getPaid() {
+        return isPaid;
+    }
+
+    public void setPaid(Boolean paid) {
+        isPaid = paid;
     }
 }

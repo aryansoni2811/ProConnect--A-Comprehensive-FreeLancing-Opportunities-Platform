@@ -13,9 +13,13 @@ import com.example.backend.security.JwtUtil;
 
 import com.example.backend.entity.Skill;
 import com.example.backend.repository.SkillRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +36,9 @@ public class FreeLancerAuthService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    // Fix: Properly initialize the logger
+    private static final Logger logger = Logger.getLogger(FreeLancerAuthService.class.getName());
 
     public AuthResponseDTO freelancerSignup(FreelancerSignupDTO signupDTO) {
         if (freelancerRepository.existsByEmail(signupDTO.getEmail())) {
@@ -81,12 +88,36 @@ public class FreeLancerAuthService {
         skillRepository.delete(skill);
     }
 
+    @Transactional(readOnly = true)
     public List<Freelancer> findFreelancersBySkill(String skillName) {
-        List<Skill> skills = skillRepository.findByNameContainingIgnoreCase(skillName);
-        return skills.stream()
-                .map(Skill::getFreelancer)
-                .distinct()
-                .collect(Collectors.toList());
+        logger.info("Service: Finding freelancers with skill: " + skillName);
+        try {
+            List<Skill> skills = skillRepository.findByNameContainingIgnoreCase(skillName);
+            logger.info("Found " + skills.size() + " matching skills");
+
+            // Use a different approach to avoid potential lazy loading issues
+            List<Long> freelancerIds = skills.stream()
+                    .map(skill -> skill.getFreelancer().getId())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (freelancerIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<Freelancer> freelancers = freelancerRepository.findAllById(freelancerIds);
+
+            // Ensure skills are loaded properly for each freelancer
+            for (Freelancer freelancer : freelancers) {
+                freelancer.setSkills(skillRepository.findByFreelancerId(freelancer.getId()));
+            }
+
+            return freelancers;
+        } catch (Exception e) {
+            logger.severe("Error in findFreelancersBySkill: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error searching freelancers by skill: " + e.getMessage(), e);
+        }
     }
 
     public AuthResponseDTO freelancerLogin(FreelancerLoginDTO loginDTO) {
