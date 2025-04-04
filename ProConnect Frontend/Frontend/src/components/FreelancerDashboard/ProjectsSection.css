@@ -120,3 +120,40 @@
     color: #718096;
     font-size: 0.875rem;
   }
+
+  .project-card.overdue {
+    border-left: 4px solid #ff5252;
+  }
+  
+  .status-badge.overdue {
+    background-color: #ff5252;
+  }
+  
+  .complete-project-btn {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .complete-project-btn:hover {
+    background-color: #3e8e41;
+  }
+  
+  .project-count {
+    background-color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+  
+  .no-projects {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+  }

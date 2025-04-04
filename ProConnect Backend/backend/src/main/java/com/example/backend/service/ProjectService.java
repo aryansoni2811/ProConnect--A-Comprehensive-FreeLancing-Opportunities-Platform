@@ -10,6 +10,8 @@ import com.example.backend.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,26 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
         return convertToDto(project);
+    }
+
+    public List<ProjectDTO> getProjectsByFreelancer(Long freelancerId) {
+        List<Project> projects = projectRepository.findByFreelancerId(freelancerId);
+        return projects.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    public ProjectDTO completeProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (!"In Progress".equals(project.getStatus())) {
+            throw new IllegalStateException("Only projects in progress can be completed");
+        }
+
+        project.setStatus("Completed");
+        project.setCompletedAt(LocalDateTime.now());
+        Project savedProject = projectRepository.save(project);
+
+        return convertToDto(savedProject);
     }
 
     @Transactional

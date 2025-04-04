@@ -2,10 +2,8 @@ package com.example.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -17,18 +15,14 @@ public class Freelancer {
     private String email;
     private String password;
 
+    @Column(nullable = false, columnDefinition = "double default 0.0")
+    private Double earnings = 0.0;
+
     @OneToMany(mappedBy = "freelancer", fetch = FetchType.EAGER)
     private List<Skill> skills = new ArrayList<>();
 
-    public List<Skill> getSkills() {
-        return skills;
-    }
+    // Getters and setters remain the same
 
-    public void setSkills(List<Skill> skills) {
-        this.skills = skills;
-    }
-
-    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -59,5 +53,21 @@ public class Freelancer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Double getEarnings() {
+        return earnings;
+    }
+
+    public void setEarnings(Double earnings) {
+        this.earnings = earnings;
+    }
+
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
     }
 }

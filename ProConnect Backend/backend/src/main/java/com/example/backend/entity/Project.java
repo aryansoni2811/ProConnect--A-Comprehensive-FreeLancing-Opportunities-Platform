@@ -37,6 +37,14 @@ public class Project {
     @Column(nullable = false)
     private String requiredSkills;
 
+    public void setFreelancer(Freelancer freelancer) {
+        this.freelancer = freelancer;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
     @Getter
     @Column(nullable = false)
     private String status = "Open"; // Open, In Progress, Completed
@@ -45,6 +53,17 @@ public class Project {
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
+
+    @Getter
+    @ManyToOne
+    @JoinColumn(name = "freelancer_id")
+    private Freelancer freelancer;
+
+    @Getter
+    @Column
+    private LocalDateTime completedAt;
+
+
 
     @Getter
     @Column(nullable = false)

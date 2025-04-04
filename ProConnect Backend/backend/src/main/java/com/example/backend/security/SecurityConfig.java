@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/projects/**").permitAll()
                         .requestMatchers("/api/proposals/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/payments/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -1,6 +1,10 @@
 package com.example.backend.controller;
 
 import com.example.backend.entity.Freelancer;
+import com.example.backend.entity.Project;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.FreelancerRepository;
+import com.example.backend.repository.ProjectRepository;
 import com.example.backend.service.FreeLancerAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,8 +16,10 @@ import com.example.backend.dto.FreelancerLoginDTO;
 import com.example.backend.dto.FreelancerSignupDTO;
 
 import com.example.backend.entity.Skill;
-import java.util.List;
+
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth/freelancer")
@@ -22,6 +28,12 @@ public class FreelancerAuthController {
 
     @Autowired
     private FreeLancerAuthService authService;
+
+    @Autowired
+    private FreelancerRepository freelancerRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     // Fix: Properly initialize the logger
     private static final Logger logger = Logger.getLogger(FreelancerAuthController.class.getName());
@@ -98,6 +110,60 @@ public class FreelancerAuthController {
             logger.severe("Error removing skill: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    // FreelancerAuthController.java
+    @GetMapping("/earnings")
+    public ResponseEntity<Map<String, Object>> getFreelancerEarnings(@RequestParam Long id) {
+        Freelancer freelancer = freelancerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Freelancer not found"));
+
+        // Get completed projects
+        List<Project> completedProjects = projectRepository.findCompletedProjectsByFreelancerId(id);
+
+        // Calculate monthly earnings
+        Map<String, Double> monthlyEarnings = completedProjects.stream()
+                .filter(p -> p.getCompletedAt() != null)
+                .collect(Collectors.groupingBy(
+                        p -> p.getCompletedAt().getMonth().toString() + "-" + p.getCompletedAt().getYear(),
+                        Collectors.summingDouble(Project::getBudget)
+                ));
+
+        // Calculate trend (simplified)
+        double trend = 0;
+        if (monthlyEarnings.size() > 1) {
+            List<Double> values = new ArrayList<>(monthlyEarnings.values());
+            double lastMonth = values.get(values.size() - 1);
+            double prevMonth = values.get(values.size() - 2);
+            trend = ((lastMonth - prevMonth) / prevMonth) * 100;
+        }
+
+        // Prepare response
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalEarnings", freelancer.getEarnings());
+        response.put("monthlyEarnings", monthlyEarnings.entrySet().stream()
+                .map(e -> {
+                    String[] parts = e.getKey().split("-");
+                    return Map.of(
+                            "month", parts[0],
+                            "year", parts[1],
+                            "amount", e.getValue()
+                    );
+                })
+                .collect(Collectors.toList()));
+        response.put("trend", trend);
+        response.put("recentTransactions", completedProjects.stream()
+                .sorted(Comparator.comparing(Project::getCompletedAt).reversed())
+                .limit(5)
+                .map(p -> Map.of(
+                        "project", p.getTitle(),
+                        "client", p.getClient().getName(),
+                        "amount", p.getBudget(),
+                        "date", p.getCompletedAt()
+                ))
+                .collect(Collectors.toList()));
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")

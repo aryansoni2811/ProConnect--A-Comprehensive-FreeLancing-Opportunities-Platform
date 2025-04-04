@@ -13,24 +13,27 @@ import ClientDashboard from './components/Client-Dashboard/Client-Dashboard';
 import FreelancerDashboard from './components/FreelancerDashboard/FreelancerDashboard';
 
 function App() {
-
   const isAuthenticated = localStorage.getItem('token') !== null;
   return (
-    <Router>
-      <Navbar />
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login-selection" element={<LoginSelection />} />
-          <Route path="/client-login" element={<ClientLogin />} />
-          <Route path="/freelancer-login" element={<FreelancerLogin />} />
-          <Route path="/client-signup" element={<ClientSignup />} />
-          <Route path="/freelancer-signup" element={<FreelancerSignup />} />
-          <Route path="/client-dashboard" element={<ClientDashboard />} />
-          <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
-        </Routes>
-      </div>
-    </Router>
+    <GoogleOAuthProvider clientId="your-client-id">
+      <Router>
+        <div className="app-container">
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login-selection" element={<LoginSelection />} />
+              <Route path="/client-login" element={<ClientLogin />} />
+              <Route path="/freelancer-login" element={<FreelancerLogin />} />
+              <Route path="/client-signup" element={<ClientSignup />} />
+              <Route path="/freelancer-signup" element={<FreelancerSignup />} />
+              <Route path="/client-dashboard" element={<ClientDashboard />} />
+              <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 

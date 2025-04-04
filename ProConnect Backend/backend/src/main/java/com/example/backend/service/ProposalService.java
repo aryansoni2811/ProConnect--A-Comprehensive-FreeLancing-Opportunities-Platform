@@ -7,6 +7,7 @@ import com.example.backend.entity.Project;
 import com.example.backend.exception.AlreadyAppliedException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.FreelancerRepository;
+import com.example.backend.repository.PaymentRepository;
 import com.example.backend.repository.ProposalRepository;
 import com.example.backend.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,21 @@ public class ProposalService {
 
     @Autowired
     private FreelancerRepository freelancerRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    public Proposal getProposalById(Long proposalId) {
+        return proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Proposal not found"));
+    }
+
+    public boolean isProposalPaid(Long proposalId) {
+        return paymentRepository.existsByProposalIdAndStatus(proposalId, "succeeded");
+    }
 
     public List<Proposal> getProposalsByProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
@@ -68,6 +84,7 @@ public class ProposalService {
         return proposalRepository.save(proposal);
     }
 
+    // ProposalService.java
     @Transactional
     public Proposal acceptProposal(Long proposalId) {
         Proposal proposal = proposalRepository.findById(proposalId)
@@ -77,14 +94,23 @@ public class ProposalService {
             throw new IllegalStateException("Project already has an accepted proposal");
         }
 
+        // Update freelancer earnings
+        Freelancer freelancer = proposal.getFreelancer();
+        freelancer.setEarnings(freelancer.getEarnings() + proposal.getBidAmount());
+        freelancerRepository.save(freelancer);
+
+        // Update project with freelancer
+        Project project = proposal.getProject();
+        project.setFreelancer(freelancer);
+        project.setStatus("In Progress");
+        projectRepository.save(project);
+
+        // Update proposal status
         proposal.setStatus("Accepted");
         proposal.setReviewedAt(LocalDateTime.now());
         Proposal acceptedProposal = proposalRepository.save(proposal);
 
-        Project project = proposal.getProject();
-        project.setStatus("In Progress");
-        projectRepository.save(project);
-
+        // Reject other proposals
         proposalRepository.rejectOtherProposals(project.getId(), proposalId);
 
         return acceptedProposal;

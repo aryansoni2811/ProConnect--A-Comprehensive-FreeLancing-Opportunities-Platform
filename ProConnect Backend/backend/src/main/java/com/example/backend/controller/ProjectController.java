@@ -41,6 +41,16 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateProject(id, projectDto));
     }
 
+    @GetMapping("/freelancer/{freelancerId}")
+    public ResponseEntity<List<ProjectDTO>> getProjectsByFreelancer(@PathVariable Long freelancerId) {
+        return ResponseEntity.ok(projectService.getProjectsByFreelancer(freelancerId));
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<ProjectDTO> completeProject(@PathVariable Long id) {
+        return ResponseEntity.ok(projectService.completeProject(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         projectService.deleteProject(id);

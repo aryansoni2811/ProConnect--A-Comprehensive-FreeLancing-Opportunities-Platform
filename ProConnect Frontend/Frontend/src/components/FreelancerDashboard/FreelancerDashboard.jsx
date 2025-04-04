@@ -19,62 +19,94 @@ import EarningsSection from './EarningsSection';
 import MessagesSection from './MessagesSection';
 import SettingsSection from './SettingsSection';
 import BrowseProjectsSection from './BrowseProjectsSection';
+import '../../App.css';
 
 const FreelancerDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [freelancerData, setFreelancerData] = useState({
     name: '',
-    email: ''
+    email: '',
+    earnings: 0,
+    completedProjects: 0,
+    activeProjects: 0,
+    skills: [],
+    profession: '',
+    id: null
   });
   const [loading, setLoading] = useState(true);
-
-  // Hardcoded data
-  const hardcodedData = {
-    profession: 'Graphic Designer',
-    totalEarnings: 45670,
-    completedProjects: 42,
-    activeProjects: 3,
-    profileCompleteness: 85,
-    recentProjects: [
-      {
-        id: 1,
-        title: 'Brand Identity Design',
-        client: 'TechInnovate Solutions',
-        status: 'Completed',
-        earnings: 1500
-      },
-      {
-        id: 2,
-        title: 'Website Redesign',
-        client: 'Global Marketing Inc.',
-        status: 'In Progress',
-        earnings: 2300
-      }
-    ]
-  };
+  const [recentProjects, setRecentProjects] = useState([]);
 
   useEffect(() => {
-    const fetchFreelancerData = async () => {
+    const fetchData = async () => {
       try {
         const email = localStorage.getItem('freelancerEmail');
         if (!email) {
-          throw new Error('No freelancer email found in localStorage');
+          throw new Error('No freelancer email found');
         }
         
-        const response = await axiosInstance.get(`/api/auth/freelancer/freelancer?email=${email}`);
+        // Fetch freelancer data
+        const freelancerResponse = await axiosInstance.get(`/api/auth/freelancer/freelancer?email=${email}`);
+        const freelancer = freelancerResponse.data;
+        
+        // Store freelancer ID in localStorage
+        localStorage.setItem('freelancerId', freelancer.id);
+        
+        // Fetch projects data
+        const projectsResponse = await axiosInstance.get(`/api/projects/freelancer/${freelancer.id}`);
+        const projects = projectsResponse.data || [];
+        
+        // Calculate stats
+        const completedProjects = projects.filter(p => {
+          const deadline = new Date(p.deadline);
+          const now = new Date();
+          return now > deadline;
+        }).length;
+        
+        const activeProjects = projects.filter(p => {
+          const deadline = new Date(p.deadline);
+          const now = new Date();
+          return now <= deadline;
+        }).length;
+        
+        // Get recent projects (last 5 completed)
+        const recentCompleted = projects
+          .filter(p => {
+            const deadline = new Date(p.deadline);
+            const now = new Date();
+            return now > deadline;
+          })
+          .sort((a, b) => new Date(b.deadline) - new Date(a.deadline))
+          .slice(0, 5);
+
         setFreelancerData({
-          name: response.data.name || 'Not provided',
-          email: response.data.email || 'Not provided'
+          name: freelancer.name,
+          email: freelancer.email,
+          earnings: freelancer.earnings || 0,
+          completedProjects,
+          activeProjects,
+          skills: freelancer.skills || [],
+          profession: freelancer.profession || 'Freelancer',
+          id: freelancer.id
         });
+
+        setRecentProjects(recentCompleted);
       } catch (error) {
-        console.error('Error fetching freelancer data:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFreelancerData();
+    fetchData();
   }, []);
+
+  const calculateProfileCompleteness = () => {
+    let completeness = 30; // Base score
+    if (freelancerData.name) completeness += 20;
+    if (freelancerData.skills?.length > 0) completeness += 30;
+    if (freelancerData.earnings > 0) completeness += 20;
+    return Math.min(completeness, 100); // Cap at 100%
+  };
 
   const renderOverview = () => (
     <div className="dashboard-metrics-grid">
@@ -82,28 +114,28 @@ const FreelancerDashboard = () => {
         <DollarSign className="metric-icon" />
         <div>
           <h3>Total Earnings</h3>
-          <p>${hardcodedData.totalEarnings.toLocaleString()}</p>
+          <p>${freelancerData.earnings.toLocaleString()}</p>
         </div>
       </div>
       <div className="dashboard-metric-card projects-card">
         <CheckCircle className="metric-icon" />
         <div>
           <h3>Completed Projects</h3>
-          <p>{hardcodedData.completedProjects}</p>
+          <p>{freelancerData.completedProjects}</p>
         </div>
       </div>
       <div className="dashboard-metric-card active-projects-card">
         <Clock className="metric-icon" />
         <div>
           <h3>Active Projects</h3>
-          <p>{hardcodedData.activeProjects}</p>
+          <p>{freelancerData.activeProjects}</p>
         </div>
       </div>
       <div className="dashboard-metric-card profile-card">
         <Zap className="metric-icon" />
         <div>
           <h3>Profile Completeness</h3>
-          <p>{hardcodedData.profileCompleteness}%</p>
+          <p>{calculateProfileCompleteness()}%</p>
         </div>
       </div>
     </div>
@@ -112,22 +144,26 @@ const FreelancerDashboard = () => {
   const renderRecentProjects = () => (
     <div className="recent-projects-container">
       <h2>Recent Projects</h2>
-      {hardcodedData.recentProjects.map(project => (
-        <div key={project.id} className="project-item">
-          <div className="project-details">
-            <h3>{project.title}</h3>
-            <p>{project.client}</p>
+      {recentProjects.length > 0 ? (
+        recentProjects.map(project => (
+          <div key={project.id} className="project-item">
+            <div className="project-details">
+              <h3>{project.title}</h3>
+              <p>{project.client?.name || 'Client'}</p>
+            </div>
+            <div className="project-status">
+              <span className={`status-badge completed`}>
+                Completed
+              </span>
+              <span className="project-earnings">
+                ${project.budget?.toLocaleString() || '0'}
+              </span>
+            </div>
           </div>
-          <div className="project-status">
-            <span className={`status-badge ${project.status.toLowerCase().replace(' ', '-')}`}>
-              {project.status}
-            </span>
-            <span className="project-earnings">
-              ${project.earnings.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p>No completed projects yet</p>
+      )}
     </div>
   );
 
@@ -136,7 +172,7 @@ const FreelancerDashboard = () => {
       <div className="profile-section">
         <User className="profile-image" size={64} />
         <h2>{freelancerData.name}</h2>
-        <p>{hardcodedData.profession}</p>
+        <p>{freelancerData.profession}</p>
         <p className="profile-email">{freelancerData.email}</p>
       </div>
       <nav className="sidebar-navigation">
@@ -175,11 +211,11 @@ const FreelancerDashboard = () => {
           </>
         );
       case 'projects':
-        return <ProjectsSection />;
-        case 'browse-projects':
-          return <BrowseProjectsSection />;
+        return <ProjectsSection freelancerId={freelancerData.id} />;
+      case 'browse-projects':
+        return <BrowseProjectsSection />;
       case 'earnings':
-        return <EarningsSection />;
+        return <EarningsSection freelancerId={freelancerData.id} />;
       case 'messages':
         return <MessagesSection />;
       case 'settings':
@@ -190,13 +226,15 @@ const FreelancerDashboard = () => {
   };
 
   return (
-    <div className="freelancer-dashboard">
-      <div className="dashboard-layout">
-        <div className="sidebar-wrapper">
-          {renderSidebar()}
-        </div>
-        <div className="main-content">
-          {renderMainContent()}
+    <div className="dashboard-container">
+      <div className="freelancer-dashboard">
+        <div className="dashboard-layout">
+          <div className="sidebar-wrapper">
+            {renderSidebar()}
+          </div>
+          <div className="main-content">
+            {renderMainContent()}
+          </div>
         </div>
       </div>
     </div>

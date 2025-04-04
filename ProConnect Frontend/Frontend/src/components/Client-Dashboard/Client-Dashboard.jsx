@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import './Client-Dashboard.css';
 import axiosInstance from '../config/axiosConfig';
+import '../../App.css'
 
 const ClientDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -732,6 +733,7 @@ const ClientDashboard = () => {
   };
 
     return (
+      <div className="dashboard-container">
       <div className="client-dashboard">
         
         <div className="dashboard-sidebar">
@@ -765,6 +767,7 @@ const ClientDashboard = () => {
         <main className="dashboard-content">
           {renderSection()}
         </main>
+      </div>
       </div>
     );
   };
