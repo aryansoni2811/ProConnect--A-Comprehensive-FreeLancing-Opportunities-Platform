@@ -30,14 +30,28 @@
     display: flex;
     min-height: 100vh;
   }
+
+  .client-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    margin-top: 60px; /* Account for navbar */
+  }
   
+  .sidebar-nav {
+    padding: 1rem 0;
+  }
+
   /* Sidebar Styles */
   .dashboard-sidebar {
-    width: 260px;
-    background-color: var(--white);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
+    width: 280px;
+    height: calc(100vh - 60px);
+    position: fixed;
+    left: 0;
+    top: 60px; /* Below navbar */
+    background: #fff;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto; /* Scrollable if content exceeds height */
+    z-index: 100;
   }
   
   .sidebar-header {
@@ -48,9 +62,9 @@
   }
   
   .user-profile {
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
     text-align: center;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #eee;
   }
   
   .user-profile-image {
@@ -60,6 +74,20 @@
     object-fit: cover;
     border: 4px solid var(--primary-color);
     margin-bottom: 1rem;
+  }
+
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: #1a73e8;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
   }
   
   .dashboard-nav {
@@ -73,22 +101,31 @@
   .nav-item {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.8rem 1.5rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s;
   }
   
   .nav-item:hover {
-    background-color: rgba(66, 133, 244, 0.1);
+    background: rgba(26, 115, 232, 0.1);
   }
   
   .nav-item.active {
-    background-color: var(--primary-color);
-    color: var(--white);
+    background: rgba(26, 115, 232, 0.1);
+    color: #1a73e8;
+    border-left: 3px solid #1a73e8;
   }
   
-  .nav-item-icon {
+  .nav-icon {
     margin-right: 1rem;
+  }
+
+  .dashboard-main-content {
+    flex: 1;
+    margin-left: 280px; /* Same as sidebar width */
+    padding: 2rem;
+    min-height: calc(100vh - 60px);
+    background: #f8f9fa;
   }
   
   /* Main Content Styles */
@@ -97,6 +134,16 @@
     padding: 2rem;
     background-color: var(--background-light);
   }
+
+  .content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  
   
   .stats-grid {
     display: grid;
@@ -182,7 +229,10 @@
     }
   
     .dashboard-sidebar {
-      width: 100%;
+      width: 240px;
+    }
+    .dashboard-main-content {
+      margin-left: 240px;
     }
   
     .stats-grid {
@@ -687,4 +737,102 @@
   align-items: center;
   padding: 20px;
   color: #666;
+}
+
+/* Profile Section Styles */
+.profile-section {
+  padding: 2rem;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #1a73e8;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.profile-info h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.profile-email {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.profile-actions {
+  margin-top: 2rem;
+}
+
+.btn-edit-profile {
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #1a73e8;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-edit-profile:hover {
+  background-color: #0d5bba;
+}
+
+@media (max-width: 768px) {
+  .client-dashboard-container {
+    flex-direction: column;
+  }
+  
+  .dashboard-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+  
+  .dashboard-main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  
+  .content-wrapper {
+    padding: 1rem;
+  }
 }

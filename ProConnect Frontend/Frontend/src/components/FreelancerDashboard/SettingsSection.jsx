@@ -128,6 +128,7 @@ const SettingsSection = ({ freelancerData }) => {
   };
 
   return (
+    <div className="settings-container-wrapper">
     <div className="settings-section">
       <div className="settings-container">
         <div className="section-header">
@@ -322,6 +323,7 @@ const SettingsSection = ({ freelancerData }) => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

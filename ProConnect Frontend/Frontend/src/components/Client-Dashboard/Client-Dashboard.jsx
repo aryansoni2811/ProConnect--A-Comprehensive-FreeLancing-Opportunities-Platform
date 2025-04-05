@@ -357,11 +357,7 @@ const ClientDashboard = () => {
       label: 'Post Project', 
       section: 'post-project' 
     },
-    { 
-      icon: Search, 
-      label: 'Find Freelancers', 
-      section: 'find-freelancers' 
-    },
+    
     { 
       icon: MessageCircle, 
       label: 'Messages', 
@@ -625,77 +621,7 @@ const ClientDashboard = () => {
           </div>
         );
       
-      case 'find-freelancers':
-        return (
-          <div className="find-freelancers-section">
-            <h2>Find Freelancers</h2>
-            <form onSubmit={handleFreelancerSearch} className="search-container">
-              <input 
-                type="text" 
-                placeholder="Search freelancers by skills (e.g., web dev, backend)" 
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit" className="search-btn" disabled={isSearching}>
-                {isSearching ? 'Searching...' : 'Search'}
-              </button>
-            </form>
-            
-            {searchError && (
-              <div className="error-message">
-                {searchError}
-              </div>
-            )}
-            
-            <div className="freelancers-list">
-              {isSearching ? (
-                <div className="loading-spinner">Loading...</div>
-              ) : searchResults.length > 0 ? (
-                <div className="freelancer-grid">
-                  {searchResults.map((freelancer) => (
-                    <div key={freelancer.id} className="freelancer-card">
-                      <div className="freelancer-header">
-                        <div className="freelancer-avatar">
-                          {freelancer.name?.charAt(0)?.toUpperCase() || 'F'}
-                        </div>
-                        <div className="freelancer-info">
-                          <h3>{freelancer.name || 'Unknown Freelancer'}</h3>
-                          <p>{freelancer.email || 'No email provided'}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="freelancer-skills">
-                        <h4>Skills:</h4>
-                        {freelancer.skills?.length > 0 ? (
-                          <div className="skills-container">
-                            {freelancer.skills.map((skill) => (
-                              <span key={skill.id} className="skill-tag">
-                                {skill.name} ({skill.proficiency})
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p>No skills listed</p>
-                        )}
-                      </div>
-                      
-                      <div className="freelancer-actions">
-                        <button className="message-btn">
-                          <Mail size={16} /> Message
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : searchQuery ? (
-                <p>No freelancers found with the specified skills.</p>
-              ) : (
-                <p>Enter a skill to search for freelancers (e.g., "web dev").</p>
-              )}
-            </div>
-          </div>
-        );
+      
       
       case 'messages':
         return (
@@ -707,68 +633,83 @@ const ClientDashboard = () => {
           </div>
         );
       
-      case 'profile':
-        return (
-          <div className="profile-section">
-            <h2>User Profile</h2>
-            <div className="profile-details">
-              <img 
-                src="/api/placeholder/200/200" 
-                alt="Profile" 
-                className="profile-image" 
-              />
-              <div className="profile-info">
-                <h3>{clientData?.name || 'Loading...'}</h3>
-                <p>Email: {clientData?.email || 'Loading...'}</p>
-                <p>Location: {clientData?.location || 'New York, USA'}</p>
-                <p>Member Since: {clientData?.createdAt ? new Date(clientData.createdAt).toLocaleDateString() : 'January 2024'}</p>
-              </div>
+        case 'profile':
+  return (
+    <div className="profile-section">
+      <h2>Profile</h2>
+      
+      {loading ? (
+        <div className="loading-spinner">Loading profile...</div>
+      ) : (
+        <div className="profile-container">
+          <div className="profile-header">
+            <div className="profile-avatar">
+              {clientData?.name?.charAt(0).toUpperCase() || 'C'}
+            </div>
+            <div className="profile-info">
+              <h3>{clientData?.name || 'Client Name'}</h3>
+              <p className="profile-email">{clientData?.email || 'email@example.com'}</p>
             </div>
           </div>
-        );
-      
+
+          <div className="profile-stats">
+            <div className="stat-item">
+              <FileText size={20} />
+              <span>{projectStats.totalProjects} Projects Posted</span>
+            </div>
+            <div className="stat-item">
+              <CheckCircle size={20} />
+              <span>{projectStats.completedProjects} Completed</span>
+            </div>
+          </div>
+
+          <div className="profile-actions">
+            <button className="btn-edit-profile">
+              Edit Profile
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
       default:
         return null;
     }
   };
 
     return (
-      <div className="dashboard-container">
-      <div className="client-dashboard">
-        
-        <div className="dashboard-sidebar">
-          <div className="user-profile">
-            <img 
-              src="/api/placeholder/120/120" 
-              alt="Profile" 
-              className="user-profile-image" 
-            />
-            <h3>{clientData?.name || 'Loading...'}</h3>
-            <p>{clientData?.email || 'Loading...'}</p>
+      <div className="client-dashboard-container">
+      <div className="dashboard-sidebar">
+        <div className="user-profile">
+          <div className="user-avatar">
+            {clientData?.name?.charAt(0).toUpperCase() || 'C'}
           </div>
-
-          <nav className="dashboard-nav">
-            <ul className="nav-menu">
-              {navigationItems.map((item, index) => (
-                <li 
-                  key={index}
-                  className={`nav-item ${activeSection === item.section ? 'active' : ''}`}
-                  onClick={() => setActiveSection(item.section)}
-                >
-                  <item.icon className="nav-item-icon" size={20} />
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <h3>{clientData?.name || 'Loading...'}</h3>
+          <p>{clientData?.email || 'Loading...'}</p>
         </div>
 
-        {/* Main Content */}
-        <main className="dashboard-content">
+        <nav className="sidebar-nav">
+          <ul className="nav-menu">
+            {navigationItems.map((item, index) => (
+              <li 
+                key={index}
+                className={`nav-item ${activeSection === item.section ? 'active' : ''}`}
+                onClick={() => setActiveSection(item.section)}
+              >
+                <item.icon className="nav-icon" size={20} />
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="dashboard-main-content">
+        <div className="content-wrapper">
           {renderSection()}
-        </main>
+        </div>
       </div>
-      </div>
+    </div>
     );
   };
 

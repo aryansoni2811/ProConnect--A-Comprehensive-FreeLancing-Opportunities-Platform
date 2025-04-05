@@ -89,37 +89,38 @@ const ProjectsSection = ({ freelancerId }) => {
   );
 
   return (
-    <div className="projects-section">
-      <div className="section-header">
-        <h2>My Projects</h2>
-        <div className="project-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
-            onClick={() => setActiveTab('active')}
-          >
-            Active ({projects.filter(p => p.status === 'In Progress').length})
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
-            onClick={() => setActiveTab('completed')}
-          >
-            Completed ({projects.filter(p => p.status === 'Completed').length})
-          </button>
+    <div className="projects-section-container">
+      <div className="projects-section">
+        <div className="section-header">
+          <h2>My Projects</h2>
+          <div className="project-tabs">
+            <button 
+              className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
+              onClick={() => setActiveTab('active')}
+            >
+              Active ({projects.filter(p => p.status === 'In Progress').length})
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
+              onClick={() => setActiveTab('completed')}
+            >
+              Completed ({projects.filter(p => p.status === 'Completed').length})
+            </button>
+          </div>
         </div>
-      </div>
+
       
-      {filteredProjects.length === 0 ? (
-        <div className="no-projects">
-          <p>{activeTab === 'active' 
-            ? "You don't have any active projects at the moment." 
-            : "You haven't completed any projects yet."}
-          </p>
-        </div>
-      ) : (
-        <div className="projects-list">
-          {filteredProjects.map(project => (
-            <div key={project.id} className={`project-card ${project.isOverdue ? 'overdue' : ''} ${project.status.toLowerCase()}`}>
-              <div className="project-header">
+        {filteredProjects.length === 0 ? (
+          <div className="no-projects">
+            <p>{activeTab === 'active' 
+              ? "You don't have any active projects at the moment." 
+              : "You haven't completed any projects yet."}
+            </p>
+          </div>
+        ) : (
+          <div className="projects-list">
+            {filteredProjects.map(project => (
+              <div key={project.id} className={`project-card ${project.isOverdue ? 'overdue' : ''} ${project.status.toLowerCase()}`}> <div className="project-header">
                 <div className="project-title">
                   <Briefcase className="project-icon" />
                   <div>
@@ -171,10 +172,11 @@ const ProjectsSection = ({ freelancerId }) => {
                   </button>
                 )}
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

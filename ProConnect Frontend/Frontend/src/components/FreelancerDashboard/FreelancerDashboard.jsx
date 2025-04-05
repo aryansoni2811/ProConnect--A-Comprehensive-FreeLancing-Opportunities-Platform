@@ -226,18 +226,85 @@ const FreelancerDashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="freelancer-dashboard">
-        <div className="dashboard-layout">
-          <div className="sidebar-wrapper">
-            {renderSidebar()}
-          </div>
-          <div className="main-content">
-            {renderMainContent()}
-          </div>
+    <div className="freelancer-dashboard-wrapper">
+    <div className="dashboard-sidebar">
+      {/* Sidebar content remains the same */}
+      <div className="profile-section">
+        <div className="profile-avatar">
+          {freelancerData.name?.charAt(0).toUpperCase() || 'F'}
         </div>
+        <h2>{freelancerData.name || 'Freelancer'}</h2>
+        <p>{freelancerData.profession || 'Professional'}</p>
+        <p className="profile-email">{freelancerData.email || 'email@example.com'}</p>
+      </div>
+      
+      <nav className="sidebar-navigation">
+        {[
+          { icon: Home, label: 'Overview', section: 'overview' },
+          { icon: Briefcase, label: 'Projects', section: 'projects' },
+          { icon: FileText, label: 'Browse Projects', section: 'browse-projects' },
+          { icon: DollarSign, label: 'Earnings', section: 'earnings' },
+          { icon: MessageCircle, label: 'Messages', section: 'messages' },
+          { icon: Settings, label: 'Settings', section: 'settings' }
+        ].map(({ icon: Icon, label, section }) => (
+          <button
+            key={section}
+            onClick={() => setActiveSection(section)}
+            className={`nav-item ${activeSection === section ? 'active' : ''}`}
+          >
+            <Icon className="nav-icon" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+
+    <div className="main-content-wrapper">
+      <div className="main-content-container">
+        {loading ? (
+          <div className="loading-spinner">Loading profile data...</div>
+        ) : (
+          <>
+            {activeSection === 'overview' && (
+              <>
+                <div className="content-section">
+                  {renderOverview()}
+                </div>
+                <div className="content-section">
+                  {renderRecentProjects()}
+                </div>
+              </>
+            )}
+            {activeSection === 'projects' && (
+              <div className="content-section">
+                <ProjectsSection freelancerId={freelancerData.id} />
+              </div>
+            )}
+            {activeSection === 'browse-projects' && (
+              <div className="content-section">
+                <BrowseProjectsSection />
+              </div>
+            )}
+            {activeSection === 'earnings' && (
+              <div className="content-section">
+                <EarningsSection freelancerId={freelancerData.id} />
+              </div>
+            )}
+            {activeSection === 'messages' && (
+              <div className="content-section">
+                <MessagesSection />
+              </div>
+            )}
+            {activeSection === 'settings' && (
+              <div className="content-section">
+                <SettingsSection freelancerData={freelancerData} />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
+  </div>
   );
 };
 

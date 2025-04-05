@@ -41,6 +41,7 @@ const MessagesSection = () => {
   };
 
   return (
+    <div className="messages-container">
     <div className="messages-section">
       <div className="messages-list">
         <div className="section-header">
@@ -91,6 +92,7 @@ const MessagesSection = () => {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };

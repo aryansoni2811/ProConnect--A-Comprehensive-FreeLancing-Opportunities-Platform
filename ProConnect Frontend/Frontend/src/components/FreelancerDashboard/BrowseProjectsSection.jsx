@@ -118,10 +118,11 @@ const BrowseProjectsSection = () => {
   }
 
   return (
-    <div className="projects-container">
+    <div className="browse-projects-container">
+      <div className="projects-container">
       {/* Modal for applying to project */}
       {showApplyModal && (
-        <div className="modal-overlay">
+        <div className="modal-overlay"> 
           <div className="apply-modal">
             <h2>Apply for {selectedProject?.title}</h2>
             
@@ -172,18 +173,18 @@ const BrowseProjectsSection = () => {
         </div>
       )}
 
-      <div className="projects-header">
-        <h1>Browse Projects</h1>
-        <div className="search-container">
-          <Search className="search-icon" size={18} />
-          <input
-            type="text"
-            placeholder="Search projects by title, description or skills..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+<div className="projects-header">
+          <h1>Browse Projects</h1>
+          <div className="search-container">
+            <Search className="search-icon" size={18} />
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
 
       <div className="projects-tabs">
         <button 
@@ -268,6 +269,7 @@ const BrowseProjectsSection = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
